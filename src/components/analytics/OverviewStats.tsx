@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Users, ShieldCheck, Briefcase, DollarSign, Star, TrendingUp, ArrowUpRight, Activity } from 'lucide-react';
+import { Users, ShieldCheck, Briefcase, DollarSign, ArrowUpRight } from 'lucide-react';
 import { GigStats, ProviderItem, JobItem } from '@/types/gig';
 
 interface OverviewStatsProps {
@@ -133,34 +133,42 @@ export const OverviewStats: React.FC<OverviewStatsProps> = ({
           </div>
 
           <div className="space-y-3">
-            {providers.slice(0, 4).map((p) => (
-              <div
-                key={p.id}
-                className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100"
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs ${p.avatarBgColor}`}>
-                    {p.name.split(' ').map((n) => n[0]).join('').toUpperCase()}
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-slate-900 text-xs">{p.name}</h4>
-                    <span className="text-[11px] text-slate-400">{p.specialization} • {p.city}</span>
-                  </div>
-                </div>
-
-                <span
-                  className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full capitalize ${
-                    p.status === 'approved'
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : p.status === 'rejected'
-                      ? 'bg-rose-100 text-rose-800'
-                      : 'bg-amber-100 text-amber-800'
-                  }`}
-                >
-                  {p.status}
-                </span>
+            {providers.length === 0 ? (
+              <div className="py-8 text-center text-slate-400">
+                <Users className="w-8 h-8 mx-auto mb-2 opacity-30 text-slate-400" />
+                <p className="text-xs font-semibold text-slate-600">No registered providers</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">Technicians and service providers will appear here</p>
               </div>
-            ))}
+            ) : (
+              providers.slice(0, 4).map((p) => (
+                <div
+                  key={p.id}
+                  className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs ${p.avatarBgColor}`}>
+                      {p.name.split(' ').map((n) => n[0]).join('').toUpperCase()}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-900 text-xs">{p.name}</h4>
+                      <span className="text-[11px] text-slate-400">{p.specialization} • {p.city}</span>
+                    </div>
+                  </div>
+
+                  <span
+                    className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full capitalize ${
+                      p.status === 'approved'
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : p.status === 'rejected'
+                        ? 'bg-rose-100 text-rose-800'
+                        : 'bg-amber-100 text-amber-800'
+                    }`}
+                  >
+                    {p.status}
+                  </span>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -179,25 +187,33 @@ export const OverviewStats: React.FC<OverviewStatsProps> = ({
           </div>
 
           <div className="space-y-3">
-            {jobs.slice(0, 4).map((j) => (
-              <div
-                key={j.id}
-                className="p-3.5 bg-slate-50/60 rounded-xl border border-slate-100 space-y-1.5"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-900 truncate max-w-[200px]">
-                    {j.title}
-                  </span>
-                  <span className="font-extrabold text-xs text-emerald-600">₹{j.budget.toLocaleString()}</span>
-                </div>
-                <div className="flex items-center justify-between text-[11px] text-slate-500">
-                  <span>Client: {j.clientName}</span>
-                  <span className="font-medium text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-100">
-                    {j.category}
-                  </span>
-                </div>
+            {jobs.length === 0 ? (
+              <div className="py-8 text-center text-slate-400">
+                <Briefcase className="w-8 h-8 mx-auto mb-2 opacity-30 text-slate-400" />
+                <p className="text-xs font-semibold text-slate-600">No active job postings</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">Marketplace jobs and requests will appear here</p>
               </div>
-            ))}
+            ) : (
+              jobs.slice(0, 4).map((j) => (
+                <div
+                  key={j.id}
+                  className="p-3.5 bg-slate-50/60 rounded-xl border border-slate-100 space-y-1.5"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-900 truncate max-w-[200px]">
+                      {j.title}
+                    </span>
+                    <span className="font-extrabold text-xs text-emerald-600">₹{j.budget.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-slate-500">
+                    <span>Client: {j.clientName}</span>
+                    <span className="font-medium text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-100">
+                      {j.category}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

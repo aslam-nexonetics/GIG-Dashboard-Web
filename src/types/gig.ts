@@ -136,3 +136,45 @@ export interface GigStats {
   totalRevenue: number;
   averageRating: number;
 }
+
+export const EMPTY_STATS: GigStats = {
+  totalProviders: 0,
+  pendingApprovals: 0,
+  approvedProviders: 0,
+  activeJobs: 0,
+  completedJobs: 0,
+  totalRevenue: 0,
+  averageRating: 0,
+};
+
+// ─── Authentication & User Session Types ──────────────────────────────────────
+
+export type UserRole = 'super_admin' | 'admin' | 'moderator' | 'user' | 'technician';
+
+export interface AuthUser {
+  id: number;
+  username: string;
+  email: string;
+  fullName?: string;
+  firstName?: string;
+  lastName?: string;
+  role: UserRole | string;
+  avatarUrl?: string;
+  isEmailVerified?: boolean;
+  status?: string;
+  lastLoginAt?: string;
+}
+
+export interface LoginCredentials {
+  emailOrUsername: string;
+  password: string;
+  rememberMe?: boolean;
+}
+
+export interface AuthTokenResponse {
+  accessToken: string;
+  refreshToken?: string;
+  tokenType: string;
+  expiresIn?: number;
+  user?: AuthUser;
+}

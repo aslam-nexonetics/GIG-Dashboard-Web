@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ShieldCheck, Check, X, Eye, FileText, UserCheck, MapPin, AlertCircle } from 'lucide-react';
+import { ShieldCheck, Check, X, Eye, FileText, UserCheck } from 'lucide-react';
 import { ProviderItem } from '@/types/gig';
 import { Modal } from '@/components/common/Modal';
 
 interface VerificationQueueProps {
   providers: ProviderItem[];
   onApprove: (id: number) => void;
-  onReject: (id: number) => void;
+  onReject: (id: number, reason?: string) => void;
 }
 
 export const VerificationQueue: React.FC<VerificationQueueProps> = ({
@@ -18,6 +18,19 @@ export const VerificationQueue: React.FC<VerificationQueueProps> = ({
 }) => {
   const pendingProviders = providers.filter((p) => p.status === 'pending');
   const [selectedProvider, setSelectedProvider] = useState<ProviderItem | null>(null);
+
+  // Reject dialog state
+  const [rejectingProviderId, setRejectingProviderId] = useState<number | null>(null);
+  const [rejectionReason, setRejectionReason] = useState<string>('');
+
+  const handleConfirmReject = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (rejectingProviderId !== null) {
+      onReject(rejectingProviderId, rejectionReason || 'Identity verification documents could not be validated.');
+      setRejectingProviderId(null);
+      setRejectionReason('');
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -95,47 +108,43 @@ export const VerificationQueue: React.FC<VerificationQueueProps> = ({
                         </span>
                         <div
                           onClick={() => setSelectedProvider(provider)}
-                          className="h-28 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden cursor-pointer relative group"
+                          className="h-28 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden cursor-pointer relative group flex items-center justify-center text-slate-400"
                         >
                           {provider.idFrontUrl ? (
                             <img
                               src={provider.idFrontUrl}
-                              alt="ID"
+                              alt="Govt ID"
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                             />
                           ) : (
-                            <div className="flex items-center justify-center h-full text-xs text-slate-400">
-                              No image
-                            </div>
+                            <FileText className="w-8 h-8 opacity-40" />
                           )}
                           <div className="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold">
-                            Inspect ID
+                            <Eye className="w-4 h-4 mr-1" /> Zoom
                           </div>
                         </div>
                       </div>
 
-                      {/* Biometric Selfie Preview */}
+                      {/* Selfie Preview */}
                       <div className="space-y-1">
                         <span className="text-[11px] font-semibold text-slate-500 block">
                           Biometric Selfie
                         </span>
                         <div
                           onClick={() => setSelectedProvider(provider)}
-                          className="h-28 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden cursor-pointer relative group"
+                          className="h-28 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden cursor-pointer relative group flex items-center justify-center text-slate-400"
                         >
                           {provider.selfieUrl ? (
                             <img
                               src={provider.selfieUrl}
-                              alt="Selfie"
+                              alt="Biometric Selfie"
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                             />
                           ) : (
-                            <div className="flex items-center justify-center h-full text-xs text-slate-400">
-                              No selfie
-                            </div>
+                            <UserCheck className="w-8 h-8 opacity-40" />
                           )}
                           <div className="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold">
-                            Inspect Selfie
+                            <Eye className="w-4 h-4 mr-1" /> Zoom
                           </div>
                         </div>
                       </div>
@@ -152,7 +161,7 @@ export const VerificationQueue: React.FC<VerificationQueueProps> = ({
                       <div className="flex items-center justify-between">
                         <span className="text-slate-400">Location:</span>
                         <span className="font-medium text-slate-800">
-                          {provider.area}, {provider.city}
+                          {provider.area ? `${provider.area}, ` : ''}{provider.city}
                         </span>
                       </div>
                     </div>
@@ -170,7 +179,10 @@ export const VerificationQueue: React.FC<VerificationQueueProps> = ({
                   </button>
 
                   <button
-                    onClick={() => onReject(provider.id)}
+                    onClick={() => {
+                      setRejectingProviderId(provider.id);
+                      setRejectionReason('');
+                    }}
                     className="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                   >
                     <X className="w-3.5 h-3.5" />
@@ -182,6 +194,46 @@ export const VerificationQueue: React.FC<VerificationQueueProps> = ({
           })}
         </div>
       )}
+
+      {/* Reject Verification Reason Modal */}
+      <Modal
+        isOpen={rejectingProviderId !== null}
+        onClose={() => setRejectingProviderId(null)}
+        title="Reject Identity Verification"
+        subtitle="Explain the reason for rejecting this verification submission"
+        maxWidth="max-w-md"
+      >
+        <form onSubmit={handleConfirmReject} className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              Rejection Feedback
+            </label>
+            <textarea
+              rows={3}
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              placeholder="e.g. ID photo is blurry, name does not match government document, selfie mismatch..."
+              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 text-slate-800"
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onClick={() => setRejectingProviderId(null)}
+              className="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl text-xs font-semibold hover:bg-slate-50 cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
+            >
+              Confirm Rejection
+            </button>
+          </div>
+        </form>
+      </Modal>
 
       {/* Detail Inspection Modal */}
       <Modal
@@ -198,38 +250,50 @@ export const VerificationQueue: React.FC<VerificationQueueProps> = ({
                 <span className="text-xs font-bold text-slate-700 block uppercase tracking-wider">
                   {selectedProvider.idType || 'Government ID Front'}
                 </span>
-                <img
-                  src={selectedProvider.idFrontUrl}
-                  alt="Front ID"
-                  className="w-full h-64 object-cover rounded-xl border border-slate-200 shadow-sm"
-                />
+                {selectedProvider.idFrontUrl ? (
+                  <img
+                    src={selectedProvider.idFrontUrl}
+                    alt="Front ID"
+                    className="w-full h-64 object-cover rounded-xl border border-slate-200 shadow-sm"
+                  />
+                ) : (
+                  <div className="w-full h-64 bg-slate-100 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400">
+                    No ID Front Uploaded
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
                 <span className="text-xs font-bold text-slate-700 block uppercase tracking-wider">
                   Biometric Facial Selfie
                 </span>
-                <img
-                  src={selectedProvider.selfieUrl}
-                  alt="Biometric Selfie"
-                  className="w-full h-64 object-cover rounded-xl border border-slate-200 shadow-sm"
-                />
+                {selectedProvider.selfieUrl ? (
+                  <img
+                    src={selectedProvider.selfieUrl}
+                    alt="Biometric Selfie"
+                    className="w-full h-64 object-cover rounded-xl border border-slate-200 shadow-sm"
+                  />
+                ) : (
+                  <div className="w-full h-64 bg-slate-100 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400">
+                    No Selfie Uploaded
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
               <button
                 onClick={() => setSelectedProvider(null)}
-                className="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl text-xs font-semibold hover:bg-slate-50 transition-colors"
+                className="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl text-xs font-semibold hover:bg-slate-50 transition-colors cursor-pointer"
               >
-                Cancel
+                Close
               </button>
               <button
                 onClick={() => {
                   onApprove(selectedProvider.id);
                   setSelectedProvider(null);
                 }}
-                className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-semibold hover:bg-emerald-700 transition-all shadow-xs"
+                className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-semibold hover:bg-emerald-700 transition-all shadow-xs cursor-pointer"
               >
                 Approve Verification
               </button>

@@ -15,10 +15,8 @@ import {
   MapPin,
   Phone,
   Mail,
-  ShieldCheck,
   Star,
   Activity,
-  Award,
 } from 'lucide-react';
 import { ProviderItem, ProviderStatus } from '@/types/gig';
 import { Modal } from '@/components/common/Modal';
@@ -26,7 +24,7 @@ import { Modal } from '@/components/common/Modal';
 interface ProviderManagementProps {
   providers: ProviderItem[];
   onApprove: (id: number) => void;
-  onReject: (id: number) => void;
+  onReject: (id: number, reason?: string) => void;
   onResetVerification: (id: number) => void;
 }
 
@@ -45,6 +43,10 @@ export const ProviderManagement: React.FC<ProviderManagementProps> = ({
 
   // Modal inspection state
   const [selectedProvider, setSelectedProvider] = useState<ProviderItem | null>(null);
+
+  // Rejection dialog state
+  const [rejectingId, setRejectingId] = useState<number | null>(null);
+  const [rejectReason, setRejectReason] = useState<string>('');
 
   // Selected row checkboxes
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
@@ -418,7 +420,10 @@ export const ProviderManagement: React.FC<ProviderManagementProps> = ({
                             </button>
                           ) : (
                             <button
-                              onClick={() => onReject(provider.id)}
+                              onClick={() => {
+                                setRejectingId(provider.id);
+                                setRejectReason('');
+                              }}
                               className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shadow-xs hover:shadow-sm active:scale-95 cursor-pointer"
                             >
                               <X className="w-3.5 h-3.5" />
@@ -659,6 +664,56 @@ export const ProviderManagement: React.FC<ProviderManagementProps> = ({
             </div>
           </div>
         )}
+      </Modal>
+
+      {/* Reject Provider Account Modal */}
+      <Modal
+        isOpen={rejectingId !== null}
+        onClose={() => setRejectingId(null)}
+        title={`Reject Provider Profile #${rejectingId}`}
+        subtitle="Explain the reason for rejecting this provider's access"
+        maxWidth="max-w-md"
+      >
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (rejectingId !== null) {
+              onReject(rejectingId, rejectReason || 'Profile does not meet marketplace standards.');
+              setRejectingId(null);
+              setRejectReason('');
+            }
+          }}
+          className="space-y-4"
+        >
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              Rejection Reason / Notes
+            </label>
+            <textarea
+              rows={3}
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="e.g. Incomplete credentials, fake contact details, unverified trade certifications..."
+              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 text-slate-800"
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onClick={() => setRejectingId(null)}
+              className="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl text-xs font-semibold hover:bg-slate-50 cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
+            >
+              Confirm Rejection
+            </button>
+          </div>
+        </form>
       </Modal>
     </div>
   );

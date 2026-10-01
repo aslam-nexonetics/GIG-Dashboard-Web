@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { FileText, CheckCircle2, Clock, XCircle, DollarSign, User } from 'lucide-react';
+import { FileText, CheckCircle2, Clock, XCircle } from 'lucide-react';
 import { ProposalItem } from '@/types/gig';
 
 interface ProposalsManagementProps {
@@ -40,42 +40,52 @@ export const ProposalsManagement: React.FC<ProposalsManagementProps> = ({ propos
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {proposals.map((prop) => (
-                <tr key={prop.id} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="py-4 px-4 font-semibold text-slate-900 max-w-xs truncate">
-                    {prop.jobTitle}
+              {proposals.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-slate-400">
+                    <FileText className="w-10 h-10 mx-auto mb-2 opacity-30 text-slate-400" />
+                    <p className="text-sm font-semibold text-slate-700">No proposals recorded</p>
+                    <p className="text-xs text-slate-400 mt-0.5">When providers bid on jobs, their proposals will be listed here.</p>
                   </td>
-                  <td className="py-4 px-4">
-                    <div className="font-semibold text-slate-800">{prop.providerName}</div>
-                    <span className="text-xs text-slate-400">{prop.providerSpecialization}</span>
-                  </td>
-                  <td className="py-4 px-4 font-bold text-emerald-600">
-                    ₹{prop.proposedPrice.toLocaleString()}
-                  </td>
-                  <td className="py-4 px-4 text-xs font-medium text-slate-700">
-                    {prop.estimatedDuration}
-                  </td>
-                  <td className="py-4 px-4 text-xs text-slate-500 max-w-sm">
-                    <p className="line-clamp-2">{prop.message}</p>
-                  </td>
-                  <td className="py-4 px-4">
-                    {prop.status === 'accepted' ? (
-                      <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200 inline-flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Accepted
-                      </span>
-                    ) : prop.status === 'rejected' ? (
-                      <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-200 inline-flex items-center gap-1">
-                        <XCircle className="w-3.5 h-3.5" /> Rejected
-                      </span>
-                    ) : (
-                      <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200 inline-flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5" /> Pending
-                      </span>
-                    )}
-                  </td>
-                  <td className="py-4 px-4 text-xs text-slate-400">{prop.createdAt}</td>
                 </tr>
-              ))}
+              ) : (
+                proposals.map((prop) => (
+                  <tr key={prop.id} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="py-4 px-4 font-semibold text-slate-900 max-w-xs truncate">
+                      {prop.jobTitle}
+                    </td>
+                    <td className="py-4 px-4">
+                      <div className="font-semibold text-slate-800">{prop.providerName}</div>
+                      <span className="text-xs text-slate-400">{prop.providerSpecialization}</span>
+                    </td>
+                    <td className="py-4 px-4 font-bold text-emerald-600">
+                      ₹{prop.proposedPrice.toLocaleString()}
+                    </td>
+                    <td className="py-4 px-4 text-xs font-medium text-slate-700">
+                      {prop.estimatedDuration}
+                    </td>
+                    <td className="py-4 px-4 text-xs text-slate-500 max-w-sm">
+                      <p className="line-clamp-2">{prop.message}</p>
+                    </td>
+                    <td className="py-4 px-4">
+                      {prop.status === 'accepted' ? (
+                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200 inline-flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Accepted
+                        </span>
+                      ) : prop.status === 'rejected' ? (
+                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-200 inline-flex items-center gap-1">
+                          <XCircle className="w-3.5 h-3.5" /> Rejected
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200 inline-flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5" /> Pending
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-4 px-4 text-xs text-slate-400">{prop.createdAt}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
